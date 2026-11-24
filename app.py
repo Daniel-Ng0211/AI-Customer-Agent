@@ -4,17 +4,17 @@ import streamlit as st
 import pandas as pd
 
 from database import (
-    init_db,
-    add_customer,
+    visit_history,
+    daily_visit_stats,
+    get_stats,
     list_customers,
+    add_customer,
     update_customer,
     delete_customer,
     check_in,
     check_out,
     active_visits,
-    visit_history,
-    get_stats,
-    daily_visit_stats
+    init_db
 )
 
 from agent import CustomerAgent
@@ -510,28 +510,33 @@ elif page == "Khách ra phòng":
 # ======================================
 
 
+
 elif page == "Lịch sử ra vào":
 
     st.header("📋 LỊCH SỬ RA VÀO")
 
-    keyword = st.text_input(
-        "Tìm kiếm khách hàng"
-    )
-
+    # Lấy dữ liệu từ database
     history = visit_history(500)
 
-    filtered = [
+    # Ô tìm kiếm
+    keyword = st.text_input(
+        "Tìm kiếm theo mã khách hàng hoặc họ tên"
+    )
+
+    # Lọc dữ liệu
+    filtered_history = [
         row for row in history
         if keyword.lower() in (
-            row["customer_code"]
+            str(row["customer_code"])
             + " "
-            + row["full_name"]
+            + str(row["full_name"])
         ).lower()
     ]
 
-    if filtered:
+    # Hiển thị kết quả
+    if filtered_history:
 
-        df = pd.DataFrame(filtered)
+        df = pd.DataFrame(filtered_history)
 
         st.dataframe(
             df,
@@ -540,14 +545,12 @@ elif page == "Lịch sử ra vào":
         )
 
         st.success(
-            f"Tìm thấy {len(filtered)} lượt ra vào."
+            f"Tìm thấy {len(filtered_history)} lượt ra vào."
         )
 
     else:
 
-        st.info("Không tìm thấy dữ liệu.")
-
-
+        st.info("Chưa có dữ liệu hoặc không tìm thấy khách hàng.")
 
 # ======================================
 # 8. AI AGENT
